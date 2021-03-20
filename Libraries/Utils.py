@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from scipy.signal import argrelextrema
 from sklearn.preprocessing import MinMaxScaler
 from pickle import dump, load
+import os
     
 class DataHandler:
     def __init__(self, isMT5=False, isTickData=False, verbose=1):
@@ -19,7 +20,7 @@ class DataHandler:
         self.isMT5 = isMT5              # is it an mt5 connection or training the models from csv 
         self.isTickData = isTickData    # is the data required tickdata
     
-    
+
     ########################################################
     #### HELPER FUNCTION USED FOR PYTHON-MT5 CONNECTION ####
     ########################################################

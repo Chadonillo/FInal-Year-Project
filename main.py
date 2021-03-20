@@ -13,6 +13,7 @@ from GUI.ui_main import Ui_MainWindow
 # IMPORT FUNCTIONS that connect to application
 from GUI.ui_functions import *
 
+#My test
 class MainWindow(QMainWindow):
     def __init__(self):
         """

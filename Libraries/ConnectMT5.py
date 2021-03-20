@@ -36,7 +36,7 @@ class StrategyConnectMT5:
         """
             Returns model prediction
         """
-        return str(random.choices([0,1,2], weights=[0.4, 0.4, 0.2])[0])
+        return str(random.choices([0,1,2], weights=[0.1, 0.1, 0.9])[0])
     
     def writeTradeToFile(self, direction):
         """
