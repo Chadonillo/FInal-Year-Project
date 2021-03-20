@@ -4,7 +4,6 @@ import talib
 import os
 from pathlib import Path
 
-# hey
 class Data:
     def __init__(self):
         self.rawTickData = {}
