@@ -3,10 +3,11 @@
 # I have also added my own elements to the GUI.
 
 # Import Libraries
-from PyQt5.QtCore import QPropertyAnimation, QThread, QEasingCurve
+from PyQt5.QtCore import QPropertyAnimation, QThread, QEasingCurve, Qt
 from PyQt5.QtGui import QPixmap
 from main import MainWindow
-from Libraries.ConnectMT5 import StrategyConnectMT5 
+from Libraries.ConnectMT5 import StrategyConnectMT5
+import time
 
 class ThreadRunButton(QThread):
     def __init__(self, uiClass):
@@ -28,16 +29,24 @@ class ThreadRunButton(QThread):
             Connection is currently turned on in the app
         """
         self.running = True # Signify that we started running 
+        self.uiClass.ui.infoLabel.setText("Running....")
+        self.uiClass.ui.infoLabel.setAlignment(Qt.AlignCenter)
         setRadioButtons(self.uiClass , False)
         self.uiClass.ui.label_2.setPixmap(QPixmap("GUI\Images\logoGreen.png"))  # Turn image Green
         pairs = getSelectedPairs(self.uiClass) # Get pairs from radio buttons
         timeFrames = getSelectedTimeFrames(self.uiClass) # get timeframes form radio buttons
 
         mtStrategy = StrategyConnectMT5(pairs, timeFrames) # Create a connection class
-        mtStrategy.run(self)    # Run connection
-        self.uiClass.ui.label_2.setPixmap(QPixmap("GUI\Images\logo.png")) # When finished set image back to normal to indicate it is done.
+        success = mtStrategy.run(self)    # Run connection
         setRadioButtons(self.uiClass , True)
         self.running = False # Signify that thread has finished running
+        self.uiClass.ui.label_2.setPixmap(QPixmap("GUI\Images\logo.png")) # When finished set image back to normal to indicate it is done.
+        if not success:
+            self.uiClass.ui.infoLabel.setText("Install MT5 First....")
+            self.uiClass.ui.infoLabel.setAlignment(Qt.AlignCenter)
+            QThread.sleep(5)
+        self.uiClass.ui.infoLabel.setText("Ready....")
+        self.uiClass.ui.infoLabel.setAlignment(Qt.AlignCenter)
 
 class UIFunctions(MainWindow):
     """

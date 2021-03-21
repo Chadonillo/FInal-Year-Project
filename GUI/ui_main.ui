@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>774</width>
+    <width>976</width>
     <height>575</height>
    </rect>
   </property>
@@ -166,7 +166,7 @@ border: 0px solid;</string>
         <widget class="QFrame" name="frame_left_menu">
          <property name="minimumSize">
           <size>
-           <width>70</width>
+           <width>71</width>
            <height>0</height>
           </size>
          </property>
@@ -309,7 +309,7 @@ QPushButton:hover {
           <item>
            <widget class="QStackedWidget" name="stackedWidget">
             <property name="currentIndex">
-             <number>1</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="page_1">
              <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -618,7 +618,7 @@ QPushButton:hover {
                      </widget>
                     </item>
                     <item row="0" column="1">
-                     <widget class="QLabel" name="label_3">
+                     <widget class="QLabel" name="infoLabel">
                       <property name="font">
                        <font>
                         <family>Georgia</family>
@@ -629,7 +629,7 @@ QPushButton:hover {
                        <string notr="true">color: rgb(255, 255, 255)</string>
                       </property>
                       <property name="text">
-                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Ready&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
                      </widget>
                     </item>
@@ -687,10 +687,13 @@ QPushButton:hover {
                  <string notr="true">color: #FFF;</string>
                 </property>
                 <property name="text">
-                 <string>PAGE 3</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:20pt; text-decoration: underline;&quot;&gt;Step by step instruction:&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:6pt;&quot;&gt;_________________________________________________________________________________________________________________________________________________________________________________________________________________________&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:6pt;&quot;&gt;_________________________________________________________________________________________________________________________________________________________________________________________________________________________&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;1. Download MetaTrader 5. (&lt;/span&gt;&lt;a href=&quot;https://www.metatrader5.com/en/download&quot;&gt;&lt;span style=&quot; font-size:16pt; text-decoration: underline; color:#55aaff;&quot;&gt;metatrader5.com/en/download&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;2. Download custom Expert Advisor on MT5.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;3. Now you can either place the EA directly onto a chart or run a backtest in MT5 (Ctrl-R to open backtest in MT5).&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;4. Lastly just run the AI.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:6pt;&quot;&gt;_________________________________________________________________________________________________________________________________________________________________________________________________________________________&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;(If you are backtesting, it is important you run this program first before starting the backtest on MT5.)&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:6pt;&quot;&gt;_________________________________________________________________________________________________________________________________________________________________________________________________________________________&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:6pt;&quot;&gt;_________________________________________________________________________________________________________________________________________________________________________________________________________________________&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>

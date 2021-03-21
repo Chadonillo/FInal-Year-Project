@@ -24,6 +24,26 @@ class DataHandler:
     ########################################################
     #### HELPER FUNCTION USED FOR PYTHON-MT5 CONNECTION ####
     ########################################################
+    def createFileFolder(self):
+        """
+            Creates shared folder if it does not already exists.
+        """
+        try:
+            directory =self.dataMonkey.mt5Path
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+        except OSError:
+            print ('Error: Creating directory. ' +  directory)
+
+
+    def isMT5installed(self):
+        """
+            Checks if MT5 has been installed by checking that installation folder exists
+        """
+        a = self.dataMonkey.mt5Path
+        path = a[:a[:a.rfind("\\")].rfind("\\")]
+        return os.path.exists(path)
+
     def getMT5DataPath(self):
         """
             Returns the path of data file.

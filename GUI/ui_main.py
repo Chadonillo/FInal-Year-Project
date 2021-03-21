@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(774, 575)
+        MainWindow.resize(976, 575)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -73,7 +73,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.setSpacing(0)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.frame_left_menu = QtWidgets.QFrame(self.Content)
-        self.frame_left_menu.setMinimumSize(QtCore.QSize(70, 0))
+        self.frame_left_menu.setMinimumSize(QtCore.QSize(71, 0))
         self.frame_left_menu.setMaximumSize(QtCore.QSize(70, 16777215))
         self.frame_left_menu.setStyleSheet("background-color: rgb(35, 35, 35);")
         self.frame_left_menu.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -297,14 +297,14 @@ class Ui_MainWindow(object):
         self.label_2.setWordWrap(False)
         self.label_2.setObjectName("label_2")
         self.gridLayout_3.addWidget(self.label_2, 0, 0, 1, 1)
-        self.label_3 = QtWidgets.QLabel(self.frame_2)
+        self.infoLabel = QtWidgets.QLabel(self.frame_2)
         font = QtGui.QFont()
         font.setFamily("Georgia")
         font.setPointSize(16)
-        self.label_3.setFont(font)
-        self.label_3.setStyleSheet("color: rgb(255, 255, 255)")
-        self.label_3.setObjectName("label_3")
-        self.gridLayout_3.addWidget(self.label_3, 0, 1, 1, 1)
+        self.infoLabel.setFont(font)
+        self.infoLabel.setStyleSheet("color: rgb(255, 255, 255)")
+        self.infoLabel.setObjectName("infoLabel")
+        self.gridLayout_3.addWidget(self.infoLabel, 0, 1, 1, 1)
         self.verticalLayout_11.addWidget(self.frame_2)
         self.runButton = QtWidgets.QPushButton(self.frame)
         font = QtGui.QFont()
@@ -333,6 +333,7 @@ class Ui_MainWindow(object):
         self.label.setFont(font)
         self.label.setStyleSheet("color: #FFF;")
         self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setWordWrap(True)
         self.label.setObjectName("label")
         self.verticalLayout_8.addWidget(self.label)
         self.stackedWidget.addWidget(self.page_3)
@@ -342,7 +343,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -366,10 +367,10 @@ class Ui_MainWindow(object):
         self.m_1radioButton.setText(_translate("MainWindow", "1 Minute"))
         self.m_30radioButton.setText(_translate("MainWindow", "30 Minute"))
         self.m_5radioButton.setText(_translate("MainWindow", "5 Minute"))
-        self.label_3.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:20pt;\">Output</span></p></body></html>"))
+        self.infoLabel.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-style:italic;\">Ready</span></p></body></html>"))
         self.runButton.setText(_translate("MainWindow", "Run"))
         self.stopButton.setText(_translate("MainWindow", "Stop"))
-        self.label.setText(_translate("MainWindow", "PAGE 3"))
+        self.label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:20pt; text-decoration: underline;\">Step by step instruction:</span></p><p align=\"center\"><span style=\" font-size:6pt;\">_________________________________________________________________________________________________________________________________________________________________________________________________________________________</span></p><p align=\"center\"><span style=\" font-size:6pt;\">_________________________________________________________________________________________________________________________________________________________________________________________________________________________</span></p><p align=\"center\"><span style=\" font-size:16pt;\">1. Download MetaTrader 5. (</span><a href=\"https://www.metatrader5.com/en/download\"><span style=\" font-size:16pt; text-decoration: underline; color:#55aaff;\">metatrader5.com/en/download</span></a><span style=\" font-size:16pt;\">)</span></p><p align=\"center\"><span style=\" font-size:16pt;\">2. Download custom Expert Advisor on MT5.</span></p><p align=\"center\"><span style=\" font-size:16pt;\">3. Now you can either place the EA directly onto a chart or run a backtest in MT5 (Ctrl-R to open backtest in MT5).</span></p><p align=\"center\"><span style=\" font-size:16pt;\">4. Lastly just run the AI.</span></p><p align=\"center\"><span style=\" font-size:6pt;\">_________________________________________________________________________________________________________________________________________________________________________________________________________________________</span></p><p align=\"center\"><span style=\" font-size:16pt;\">(If you are backtesting, it is important you run this program first before starting the backtest on MT5.)</span></p><p align=\"center\"><span style=\" font-size:6pt;\">_________________________________________________________________________________________________________________________________________________________________________________________________________________________</span></p><p align=\"center\"><span style=\" font-size:6pt;\">_________________________________________________________________________________________________________________________________________________________________________________________________________________________</span></p></body></html>"))
 
 
 if __name__ == "__main__":

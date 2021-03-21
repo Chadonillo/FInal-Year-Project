@@ -55,6 +55,8 @@ class MainWindow(QMainWindow):
         # SHOW ==> MAIN WINDOW
         self.ui.EURUSDradioButton.setChecked(True)
         self.ui.m_1radioButton.setChecked(True)
+        self.ui.infoLabel.setText("Ready....")
+        self.ui.infoLabel.setAlignment(QtCore.Qt.AlignCenter)
         UIFunctions.pageSet(self, self.ui.page_1, self.ui.btn_page_1) # Set first page displayed to page 1
         self.show() # Show GUI
 

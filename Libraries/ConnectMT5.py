@@ -122,6 +122,11 @@ class StrategyConnectMT5:
             Parameters:
                 thread: This function can be run in a thread, this is the thread it will run in.
         """
+        if self.dataHandler.isMT5installed():
+            self.dataHandler.createFileFolder()
+        else:
+            return False
+
         self.reset()                                                # Reset files
         done = self.dataHandler.isBacktestDone()                    # Get done status of EA
         self.stockData = self.dataHandler.getFullData(self.pair)    # Get the stock data if it is available in shared files
@@ -140,3 +145,4 @@ class StrategyConnectMT5:
                 self.writeTradeToFile(direction)                    # send prediction to MT5 EA
 
         self.reset() # Reset files
+        return True
