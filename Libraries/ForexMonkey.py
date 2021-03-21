@@ -10,7 +10,7 @@ class Data:
         self.mt5Path = str(Path.home())+"\AppData\Roaming\MetaQuotes\Terminal\Common\Files\\"
     
     def getDataCSV(self, ForexPair, timeFrame, volume_in=False, tickData = False): #TF is either 1H or 1M
-        path = 'Data/'
+        path = '../Data/'
         if tickData: path +='Tick/'
         else: path +='Minute/'
             
