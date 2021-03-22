@@ -3,7 +3,6 @@ import Libraries.ForexMonkey as fm
 import numpy as np
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split
-from scipy.signal import argrelextrema
 from sklearn.preprocessing import MinMaxScaler
 from pickle import dump, load
 import os
@@ -170,35 +169,73 @@ class DataHandler:
         self.dataMonkey.STOCHRSI(StockData)
         self.dataMonkey.ULTOSC(StockData)
         self.dataMonkey.WILLR(StockData)
+
+        self.dataMonkey.HT_DCPERIOD(StockData)
+        self.dataMonkey.HT_DCPHASE(StockData)
+        self.dataMonkey.HT_PHASOR(StockData)
+        self.dataMonkey.HT_SINE(StockData)
+        self.dataMonkey.HT_TRENDMODE(StockData)
+        self.dataMonkey.ATRLabel(StockData)
+
+        self.dataMonkey.candlePatterns(StockData)
         
         ##Get rid of rows that have empty cells 
         StockData.dropna(inplace = True)
-        return StockData
-
-    def classifytest(self, df, n):
-        """
-            This class adds labels to the inputs (add more explanantion)
-        """
-        finalArray = np.full(len(df), 2)
-        call_Positions = argrelextrema(df.close.values, np.less_equal, order=n)[0]
-        put_Positions = argrelextrema(df.close.values, np.greater_equal, order=n)[0]
-        for call_Position in call_Positions:
-            finalArray[call_Position] = 1
-        for put_Position in put_Positions:
-            finalArray[put_Position] = 0
-        return finalArray
-
-    def addAllTheLabels(self, StockData, n=0):
-        """
-            This class adds labels to the inputs (add more explanantion)
-        """
+    
+    def addLabels(self, df, maxTradeCandles):
         if self.verbose:
             print("Adding Labels.")
-            
-        new_col = self.classifytest(StockData, n)
-        StockData.insert(loc=len(StockData.columns), column='Direction', value=new_col)
-        return StockData
-    
+        df["Buy_SL"] = df["close"] - df["ATR Label"]*2
+        df["Buy_TP"] = df["close"] + df["ATR Label"]*3
+        df["Sell_SL"] = df["close"] + df["ATR Label"]*2
+        df["Sell_TP"] = df["close"] - df["ATR Label"]*3
+
+        dfLen = len(df)
+        labels = []
+        highVal = df.high.values
+        lowVal = df.low.values
+        buySlVal = df["Buy_SL"].values
+        sellSlVal = df["Sell_SL"].values
+        buyTpVal = df["Buy_TP"].values
+        sellTpVal = df["Sell_TP"].values
+        for currentCandle in range(dfLen):
+            direction = 2
+            buySlHit = False
+            sellSlHit = False
+            for forwardCandle in range(min(currentCandle+1, dfLen-1), min(currentCandle+maxTradeCandles+1, dfLen-1)):
+                # Do not take consecutive trades
+                if labels[-maxTradeCandles:].count(0) > 0 or labels[-maxTradeCandles:].count(1) > 0:
+                    break
+                # Both SL have been hit so no valid trade
+                if buySlHit and sellSlHit:
+                    break
+                # Buy SL Hit
+                if lowVal[forwardCandle] <= buySlVal[currentCandle]:
+                    buySlHit = True
+                # Sell SL Hit
+                if highVal[forwardCandle] >= sellSlVal[currentCandle]:
+                    sellSlHit = True
+                # Buy TP Hit
+                if highVal[forwardCandle] >= buyTpVal[currentCandle] and not buySlHit:
+                    direction = 1
+                    break
+                # Sell TP Hit
+                if lowVal[forwardCandle] <= sellTpVal[currentCandle] and not sellSlHit:
+                    direction = 0
+                    break
+            labels.append(direction)
+        df["Direction"] = labels
+
+
+    def getLabelWeights(self, stockData):
+        class_weights = {}
+        counts = stockData['Direction'].value_counts().to_dict()
+        numerator = 1 / (1/counts[0] + 1/counts[1] + 1/counts[2])
+        class_weights[0] = numerator/counts[0]
+        class_weights[1] = numerator/counts[1]
+        class_weights[2] = numerator/counts[2]
+        return class_weights
+
     def printDirectionAmount(self, stockData):
         """
             Simply prints out the amount of buys, sells and holds in the data set.
@@ -296,4 +333,3 @@ class DataHandler:
             y = self.oneHotEncode(y)
 
         return x, y
-    
