@@ -61,7 +61,7 @@ class Data:
         data['EMA '+str(value)] = talib.EMA(data.close.values, timeperiod=value)
     
     def HT_TRENDLINE(self, data, value=14):
-        data['HT_TRENDLINE'] = talib.HT_TRENDLINE(data.close.values)
+        data['HT_TRENDLINE '+str(value)] = talib.HT_TRENDLINE(data.close.values)
         
     def KAMA(self, data, value=14):
         data['KAMA '+str(value)] = talib.KAMA(data.close.values, timeperiod=value)
@@ -88,9 +88,6 @@ class Data:
     def ADXR(self, data, value=14):
          data['ADXR '+str(value)] = talib.ADXR(data.high.values, data.low.values, data.close.values, timeperiod=value)
             
-    def APO(self, data, fast=12, slow=26):
-        data['APO '+str(fast)+'_'+str(slow)] = talib.APO(data.close.values, fastperiod=fast, slowperiod=slow, matype=0)   
-    
     def AROONOSC(self, data, value=14):
         data['AROONOSC '+str(value)] = talib.AROONOSC(data.high.values, data.low.values, timeperiod=value)
     
@@ -150,9 +147,6 @@ class Data:
     def WILLR(self, data, value=14):
         data['WILLR '+str(value)] = talib.WILLR(data.high.values, data.low.values, data.close.values, timeperiod=value)
 
-
-
-
     def HT_DCPERIOD(self, data):
         data['HT_DCPERIOD'] = talib.HT_DCPERIOD(data.close.values)
 
@@ -170,13 +164,11 @@ class Data:
     def HT_TRENDMODE(self, data):
         data['HT_TRENDMODE'] = talib.HT_TRENDMODE(data.close.values)
 
-    
     def ATR(self, data, value=14):
         data['ATR '+str(value)] = talib.ATR(data.high.values, data.low.values, data.close.values, timeperiod=value)
 
-    def ATRLabel(self, data, value=14):
+    def ATRLabel(self, data):
         data['ATR Label'] = talib.ATR(data.high.values, data.low.values, data.close.values, timeperiod=20)
-
 
     ## This function was taken from https://github.com/CanerIrfanoglu/medium/blob/master/candle_stick_recognition/identify_candlestick.py
     ## Heavy it was also heavily modified to increase its efficiency and running time on large datasets.

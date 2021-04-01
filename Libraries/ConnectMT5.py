@@ -1,14 +1,18 @@
 # Import libraries
 from Libraries.Utils import DataHandler
+from Libraries.KerasCustom import *
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 import random, os
 import pandas as pd
+import numpy as np
+import tensorflow.keras.backend as K
 
 # Check if you have any number of GPUs to run the model calculations 
 physical_devices = tf.config.experimental.list_physical_devices('GPU')
 for i in range(len(physical_devices)):
     tf.config.experimental.set_memory_growth(physical_devices[i], True)
+
 
 class StrategyConnectMT5:
     def __init__(self, pair, tf):
@@ -28,7 +32,7 @@ class StrategyConnectMT5:
         self.dataHandler = DataHandler(isMT5=True, verbose=0)
         self.pair = pair
         self.timeFrame = tf
-        self.model = load_model("Models/"+self.pair+"_"+self.timeFrame+".h5")
+        self.model = load_model("Models/"+self.pair+"_"+self.timeFrame+".h5", custom_objects={'winRatio': winMetric([],[]), 'NoTradesInBatch':  TradeFrequency([],[])})
         self.oldStockData = None
         self.stockData = None
     
@@ -36,8 +40,19 @@ class StrategyConnectMT5:
         """
             Returns model prediction
         """
-        return str(random.choices([0,1,2], weights=[0.02, 0.02, 0.96])[0])
+        df = stockData.copy()
+        self.dataHandler.addAllIndicators(df)
+        self.dataHandler.featureSelection(df)
+        x = self.dataHandler.preprocess_df(df, self.pair, self.timeFrame)
+        prediction = self.model.predict(np.array([x]))[0]
+        a = self.predictionThreshold(prediction)
+        return str(a)   #str(random.choices([0,1,2], weights=[0.02, 0.02, 0.96])[0])
     
+    def predictionThreshold(self, prediction, threshold = 0):
+        maxValue = max(prediction)
+        if maxValue >= threshold:
+            return prediction.argmax()
+        return 2
     def writeTradeToFile(self, direction):
         """
             Write the desired trade to the trade file so it can be ready 
@@ -138,8 +153,9 @@ class StrategyConnectMT5:
             self.stockData = self.dataHandler.getFullData(self.pair)# Get currency data from mt5
             done = self.dataHandler.isBacktestDone()                # Check if EA is done backtesting
             threadRunning = self.isThreadRunning(thread)            # Check if thread is still running
-
-            if not self.stockData.equals(self.oldStockData):        # If the new data has changed from what it used to be then trade
+            
+            # If the new data has changed from what it used to be then trade
+            if not self.stockData.equals(self.oldStockData) and not self.stockData.equals(pd.DataFrame([])):        
                 self.oldStockData = self.stockData                  # Set old data to new data
                 direction = self.getPrediction(self.stockData)      # Get AI prediction
                 self.writeTradeToFile(direction)                    # send prediction to MT5 EA

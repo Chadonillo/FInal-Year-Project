@@ -1,11 +1,11 @@
 # import libraries
 import Libraries.ForexMonkey as fm
 import numpy as np
-from pandas import DataFrame
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from pickle import dump, load
-import os
+import pandas as pd
+import random, math, os
     
 class DataHandler:
     def __init__(self, isMT5=False, isTickData=False, verbose=1):
@@ -19,7 +19,6 @@ class DataHandler:
         self.isMT5 = isMT5              # is it an mt5 connection or training the models from csv 
         self.isTickData = isTickData    # is the data required tickdata
     
-
     ########################################################
     #### HELPER FUNCTION USED FOR PYTHON-MT5 CONNECTION ####
     ########################################################
@@ -33,7 +32,6 @@ class DataHandler:
                 os.makedirs(directory)
         except OSError:
             print ('Error: Creating directory. ' +  directory)
-
 
     def isMT5installed(self):
         """
@@ -99,7 +97,6 @@ class DataHandler:
             if int(read) == 1: return True
         return False
 
-
     #####################################################
     #### FUNCTIONS FOR GETTING AND MANIPULATING DATA ####
     #####################################################
@@ -118,27 +115,26 @@ class DataHandler:
                 Stockdata (DataFrame): a pandas data frame with the currency pair raw data.
         """
         if self.verbose:
-            print("Getting Data. This can take up to time on first run.")
+            print("Getting Data.")
 
         if self.isMT5: StockData = self.dataMonkey.getBackTestData(market)
         else: StockData=self.dataMonkey.getDataCSV(market, timeFrame, False, self.isTickData)
 
+        if self.verbose:
+            print("Number of data points:", len(StockData))
         return StockData
-        
-      
+
     def addAllIndicators(self, StockData):
         """
             This function adds a variety of technical indicators to the data using the
             ForexMonkey Library.
-
             Parameters:
                 StockData (DataFrame): The raw data frame you want to add indicators to.
-
             Returns:
                 StockData (DataFrame): The dataframe with indicators included.
         """
         if self.verbose:
-            print("Adding Indicators. This can take up to 10 minutes.")
+            print("Adding Indicators.")
 
         self.dataMonkey.BBANDS(StockData)
         self.dataMonkey.DEMA(StockData)
@@ -181,7 +177,7 @@ class DataHandler:
         
         ##Get rid of rows that have empty cells 
         StockData.dropna(inplace = True)
-    
+
     def addLabels(self, df, maxTradeCandles):
         if self.verbose:
             print("Adding Labels.")
@@ -192,14 +188,17 @@ class DataHandler:
 
         dfLen = len(df)
         labels = []
+        acc_dir = []
         highVal = df.high.values
         lowVal = df.low.values
+        closeVal = df.close.values
         buySlVal = df["Buy_SL"].values
         sellSlVal = df["Sell_SL"].values
         buyTpVal = df["Buy_TP"].values
         sellTpVal = df["Sell_TP"].values
         for currentCandle in range(dfLen):
             direction = 2
+            accDirection = 2
             buySlHit = False
             sellSlHit = False
             for forwardCandle in range(min(currentCandle+1, dfLen-1), min(currentCandle+maxTradeCandles+1, dfLen-1)):
@@ -223,18 +222,30 @@ class DataHandler:
                 if lowVal[forwardCandle] <= sellTpVal[currentCandle] and not sellSlHit:
                     direction = 0
                     break
+
+            
+            if direction==2:
+                futureCandle = currentCandle+maxTradeCandles
+                if futureCandle<dfLen:
+                    if closeVal[futureCandle] > closeVal[currentCandle]:
+                        accDirection = 1
+                    elif closeVal[futureCandle] < closeVal[currentCandle]:
+                        accDirection = 0
+            else:
+                accDirection = direction     
             labels.append(direction)
+            acc_dir.append(accDirection)
+
+
+        df.drop(columns=['Buy_SL', 'Buy_TP', 'Sell_SL', 'Sell_TP'], inplace=True)
+        df["Actual Direction"] = acc_dir
         df["Direction"] = labels
 
-
-    def getLabelWeights(self, stockData):
-        class_weights = {}
-        counts = stockData['Direction'].value_counts().to_dict()
-        numerator = 1 / (1/counts[0] + 1/counts[1] + 1/counts[2])
-        class_weights[0] = numerator/counts[0]
-        class_weights[1] = numerator/counts[1]
-        class_weights[2] = numerator/counts[2]
-        return class_weights
+    def featureSelection(self, df):
+        dropCols = ['HT_TRENDMODE', 'open', 'high', 'low', 'BBANDS 5_2', 'close', 'DEMA 14', 'TEMA 14',
+                    'BBANDS UB 5_2', 'EMA 14', 'WMA 14', 'BBANDS Lb 5_2', 'TRIMA 14', 'SMA 14', 'MAMA 0.5_0.05',
+                    'FAMA 0.5_0.05', 'KAMA 14', 'SAR 0.02_0.2', 'Fast_K']
+        df.drop(columns=dropCols, inplace=True)
 
     def printDirectionAmount(self, stockData):
         """
@@ -244,56 +255,105 @@ class DataHandler:
                 StockData (DataFrame): The data frame with labels.
         """
         counts = stockData['Direction'].value_counts().to_dict()
+
         print("Hold Trades: ",counts[2])
         print("Call Trades: ",counts[1])
         print("Put Trades:  ",counts[0])
     
-    def splitDataFrame(self, X, y, testSplit):
-        """
-            Splits the data set into training and testing dataset for both features and labels.
+    def splitDataFrame(self, StockData, splitNo):
+        if self.verbose:
+            print("Splitting Training And Testing Data")
 
-            Parameters:
-                X (array): The features of the data.
-                y (array): The labels of the data set.
-                testSplit (float): The amount of data you want as training set between 0-1.
-        
-        """
-        return train_test_split(X, y, test_size=testSplit, shuffle=False)
+        #split df to test and train data
+        times = sorted(StockData.index.values)
+        testDays = times[-int(splitNo*len(times))]
+
+        validation_df=StockData[(StockData.index>=testDays)]
+        main_df=StockData[(StockData.index<testDays)]
+        return main_df, validation_df
     
-    def preprocess_df(self, df, pair, timeFrame, live=False):
-        """
-            Turns data frame into a two scaled numpy arrays. 
-            One array is the features and the other is the labels.
-
-            They are scaled to make learning more efficient for the NN
-
-            Parameters:
-                df (DataFrame): the data frame you want to transform
-                pair (str): the currency pair of the data
-                timeFrame (str): the time frame of the data
-                live (bool): if data is live then we only need X values.
-
-                Returns:
-                    x (array): features of the data frame
-                    y (array): labels of the data set
-        """
-        if live:
-            x = df
+    def preprocess_df(self, df, pair, timeFrame, lookBack=None, isBool=False, raw=True):
+        if lookBack==None:
             scaler = load(open('Scalers/'+pair+'_'+timeFrame+'.pkl', 'rb'))
-            x = scaler.transform(x)
+            x = scaler.transform(df.values)
             return x
-    
-        x = df[df.columns[:-1]]
-        y = df[df.columns[-1:]]
 
-        # define scaler
+        if self.verbose:
+            print("Preprocessing your pandas dataframe:")
+            print("\tReshapping Data To Numpy Arrays For Model.")
+            print("\tScaling dataset.")
         scaler = MinMaxScaler()
-        # fit scaler on the training dataset
-        scaler.fit(x)
-        # transform the training dataset
-        x = scaler.transform(x)
+        x_data = scaler.fit_transform(df[df.columns[:-2]].values)
+        y_data = df[df.columns[-1]].values
+        acc_dir = df[df.columns[-2]].values
         dump(scaler, open('Scalers/'+pair+'_'+timeFrame+'.pkl', 'wb'))
-        return x, y.values
+        
+        if self.verbose:
+            print("\tAdding LSTM look back period.")
+        sequential_data = []
+        dataLen = x_data.shape[0]
+        # Loop of the entire data set
+        for i in range(dataLen):
+            end_ix = i + lookBack
+            if end_ix >= dataLen:
+                break
+            # Append the list with sequencies
+            sequential_data.append([x_data[i:end_ix], acc_dir[end_ix], y_data[end_ix]])
+        
+        
+        if self.verbose:
+            print("\tOversampling to balance dataset.")
+        calls = []
+        puts = []
+        holds = []
+        
+        for seq, acc_dir, target in sequential_data:
+            if target==1:
+                calls.append([seq, acc_dir, target])
+            elif target==0:
+                puts.append([seq, acc_dir, target])
+            elif target==2 and not isBool:
+                holds.append([seq, acc_dir, target])
+        
+        random.shuffle(calls)
+        random.shuffle(puts)
+        if not isBool:
+            random.shuffle(holds)
+        
+        if not isBool:
+            high = max(len(calls), len(puts), len(holds))
+        else:
+            high = max(len(calls), len(puts))
+
+        if not raw:
+            calls = calls*(math.ceil(high/len(calls)))
+            puts = puts*(math.ceil(high/len(puts)))
+            if not isBool:
+                holds = holds*(math.ceil(high/len(holds)))
+
+            calls = calls[:high]
+            puts = puts[:high]
+            if not isBool:
+                holds = holds[:high]
+        
+        if self.verbose:
+            print("\tSaving to numpy arrays. (RAM Intensive)")
+        
+        if not isBool:
+            sequential_data = calls+puts+holds
+        else:
+            sequential_data = calls+puts
+        random.shuffle(sequential_data)
+    
+        x = []
+        y = []
+        acc_dirRet = []
+        for seq, acc_dir, target in sequential_data:
+            x.append(seq)
+            acc_dirRet.append(acc_dir)
+            y.append(target)
+
+        return np.array(x, dtype=np.float64), np.array(y, dtype=np.uint8), np.array(acc_dirRet, dtype=np.uint8)
     
     def oneHotEncode(self, a):
         """
@@ -309,27 +369,13 @@ class DataHandler:
         b[np.arange(a.size),a] = 1
         return b
     
-    def reshapeData(self, x, y = None, oneHot = True, live=False):
-        """
-            Reshapes the X and Y data to fit into the NN properly
+    def getLabelWeights(self, y_val):
+        class_weights = {}
+        unique, counts = np.unique(y_val, return_counts=True, axis=0)
+        factor = 0
+        for count in counts:
+            factor += (1/count)
+        for i in range(len(unique)):
+            class_weights[unique[i]] = 1/(factor*counts[i])
 
-            Parameters:
-                X (array): The features of the data.
-                y (array): The labels of the data set.
-                oneHot (bool): true if you want one hot encoded y values
-                live (bool): If live is true the return only X values
-
-            Return:
-                x (array): reshaped array of features
-                y (array): reshaped array of labels
-        """
-        if live:
-            x = x.reshape(x.shape[0], x.shape[1], 1)
-            return x
-        x = x.reshape(x.shape[0], x.shape[1], 1)
-        y = y.reshape(y.shape[0])
-
-        if oneHot:
-            y = self.oneHotEncode(y)
-
-        return x, y
+        return class_weights
